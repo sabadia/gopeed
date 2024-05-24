@@ -299,6 +299,7 @@ jobs:
               extensions: [gnome]
               plugs:
                 - network
+                - home
               slots:
                 - dbus-gopeed
           parts:
