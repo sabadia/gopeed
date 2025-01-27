@@ -1,14 +1,15 @@
 package rest
 
 import (
-	"github.com/GopeedLab/gopeed/pkg/base"
-	"github.com/GopeedLab/gopeed/pkg/download"
-	"github.com/GopeedLab/gopeed/pkg/rest/model"
-	"github.com/gorilla/mux"
 	"io"
 	"net/http"
 	"net/url"
 	"runtime"
+
+	"github.com/GopeedLab/gopeed/pkg/base"
+	"github.com/GopeedLab/gopeed/pkg/download"
+	"github.com/GopeedLab/gopeed/pkg/rest/model"
+	"github.com/gorilla/mux"
 )
 
 func Info(w http.ResponseWriter, r *http.Request) {
@@ -19,6 +20,23 @@ func Info(w http.ResponseWriter, r *http.Request) {
 		"arch":     runtime.GOARCH,
 		"inDocker": base.InDocker == "true",
 	}
+
+	statusCounts := map[base.Status]int{
+		base.DownloadStatusReady:   0,
+		base.DownloadStatusRunning: 0,
+		base.DownloadStatusPause:   0,
+		base.DownloadStatusWait:    0,
+		base.DownloadStatusError:   0,
+		base.DownloadStatusDone:    0,
+	}
+
+	tasks := Downloader.GetTasksByFilter(nil)
+	for _, task := range tasks {
+		statusCounts[task.Status]++
+	}
+
+	info["statusCounts"] = statusCounts
+
 	WriteJson(w, model.NewOkResult(info))
 }
 
