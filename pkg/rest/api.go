@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/url"
 	"runtime"
+	"strconv"
 
 	"github.com/GopeedLab/gopeed/pkg/base"
 	"github.com/GopeedLab/gopeed/pkg/download"
@@ -193,6 +194,19 @@ func GetTask(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetTasks(w http.ResponseWriter, r *http.Request) {
+	pageStr := r.URL.Query().Get("page")
+	pageSizeStr := r.URL.Query().Get("pageSize")
+
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page < 1 {
+		page = 1
+	}
+
+	pageSize, err := strconv.Atoi(pageSizeStr)
+	if err != nil || pageSize < 1 {
+		pageSize = 10
+	}
+
 	filter, errResult := parseFilter(r)
 	if errResult != nil {
 		WriteJson(w, errResult)
@@ -200,7 +214,28 @@ func GetTasks(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tasks := Downloader.GetTasksByFilter(filter)
-	WriteJson(w, model.NewOkResult(tasks))
+	totalTasks := len(tasks)
+	start := (page - 1) * pageSize
+	end := start + pageSize
+
+	if start > totalTasks {
+		start = totalTasks
+	}
+	if end > totalTasks {
+		end = totalTasks
+	}
+
+	paginatedTasks := tasks[start:end]
+
+	response := map[string]any{
+		"tasks":      paginatedTasks,
+		"total":      totalTasks,
+		"page":       page,
+		"pageSize":   pageSize,
+		"totalPages": (totalTasks + pageSize - 1) / pageSize,
+	}
+
+	WriteJson(w, model.NewOkResult(response))
 }
 
 func GetConfig(w http.ResponseWriter, r *http.Request) {
