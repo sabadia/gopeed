@@ -37,6 +37,7 @@ func Info(w http.ResponseWriter, r *http.Request) {
 	}
 
 	info["statusCounts"] = statusCounts
+	info["totalTasks"] = len(tasks)
 
 	WriteJson(w, model.NewOkResult(info))
 }
