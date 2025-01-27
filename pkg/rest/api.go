@@ -13,6 +13,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// Info returns the server information.
 func Info(w http.ResponseWriter, r *http.Request) {
 	info := map[string]any{
 		"version":  base.Version,
