@@ -194,6 +194,17 @@ func GetTask(w http.ResponseWriter, r *http.Request) {
 	WriteJson(w, model.NewOkResult(task))
 }
 
+func GetTasksOld(w http.ResponseWriter, r *http.Request) {
+	filter, errResult := parseFilter(r)
+	if errResult != nil {
+		WriteJson(w, errResult)
+		return
+	}
+
+	tasks := Downloader.GetTasksByFilter(filter)
+	WriteJson(w, model.NewOkResult(tasks))
+}
+
 func GetTasks(w http.ResponseWriter, r *http.Request) {
 	pageStr := r.URL.Query().Get("page")
 	pageSizeStr := r.URL.Query().Get("pageSize")
